@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  ### Redis
+  redis:
+    container_name: ${PROJECT_NAME}_redis
+    build: ./redis
+    volumes:
+      - ${DATA_SAVE_PATH}/redis:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      node_net:
+        ipv4_address: 10.10.10.2
+
+  ### Laravel echo server
+  echo:
+    container_name: ${PROJECT_NAME}_echo_server
+    build:
+      context: ./echo
+    ports:
+      - "${ECHO_PORT}:6001"
+    volumes:
+      - ${ECHO_SOURCE_PATH}:/usr/src/app
+    depends_on:
+      - redis
+    networks:
+      node_net:
+        ipv4_address: 10.10.10.3
+
+networks:
+  node_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.10.0/24
